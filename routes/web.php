@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PortofolioController;
+use App\Http\Controllers\PortfolioController; // Sebelumnya PortofolioController
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -9,17 +9,23 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// HAPUS RUTE LAMA INI
+// Route::get('/dashboard', function () { ... });
 
+// Grup rute yang memerlukan login
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/dashboard', [DashboardController::class, 'edit'])->name('dashboard.edit');
+    
+    // UBAH NAMA RUTE INI
+    Route::get('/dashboard', [DashboardController::class, 'edit'])->name('dashboard'); // Diubah dari 'dashboard.edit'
+    
     Route::put('/dashboard', [DashboardController::class, 'update'])->name('dashboard.update');
-    Route::get('/portfolio/{slug}', [PortofolioController::class, 'show'])->name('portfolio.show');
 });
+
+// Rute ini tidak perlu di dalam grup 'auth' karena untuk publik
+Route::get('/portfolio/{slug}', [PortfolioController::class, 'show'])->name('portfolio.show');
+
 
 require __DIR__.'/auth.php';

@@ -15,6 +15,7 @@
 
         {{-- Blok <style> tidak lagi diperlukan dan telah dihapus --}}
     </head>
+    
     <body class="font-sans antialiased bg-gray-100">
 
         {{-- Container utama yang mengatur layout vertikal (Navbar, Konten, Footer) --}}
@@ -55,5 +56,6 @@
             @include('layouts.footer')
 
         </div>
+        @stack('scripts')
     </body>
 </html>

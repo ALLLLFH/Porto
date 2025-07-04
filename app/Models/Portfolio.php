@@ -2,17 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\User;
+use App\Models\Project;
+use App\Models\Experience;
+use App\Models\Education;
+use App\Models\Skill;
+use App\Models\SocialLink;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Portfolio extends Model
 {
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $table = 'portfolios';
     protected $fillable = [
         'user_id',
         'title',
         'description',
+        'theme',
         'slug',
         'created_at',
         'updated_at',
