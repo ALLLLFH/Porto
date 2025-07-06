@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="w-full sm:px-6 lg:px-8 space-y-6">
 
             @if (session('success'))
                 <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
@@ -27,7 +27,7 @@
                 @csrf
                 @method('PUT')
 
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg mb-6">
                     <h2 class="text-lg font-medium text-gray-900">Informasi Utama</h2>
                     <div class="mt-6 space-y-6">
                         <div>
@@ -51,12 +51,12 @@
                         'experiences'  => 'Pengalaman Kerja',
                         'educations'   => 'Pendidikan',
                         'skills'       => 'Keahlian',
-                        'socialLinks' => 'Tautan Sosial', // Menggunakan camelCase agar cocok dengan nama relasi
+                        'socialLinks'  => 'Tautan Sosial', // Menggunakan camelCase agar cocok dengan nama relasi
                     ];
                 @endphp
 
                 @foreach ($sections as $sectionName => $title)
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg mb-6">
                     <h2 class="text-lg font-medium text-gray-900">{{ $title }}</h2>
                     <div id="{{ $sectionName }}-wrapper" class="mt-6 space-y-4">
                         {{-- BLADE: Menampilkan data yang sudah ada --}}
