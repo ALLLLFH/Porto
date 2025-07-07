@@ -18,10 +18,13 @@
     <!-- {{-- Blok <style> tidak lagi diperlukan dan telah dihapus --}} -->
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased relative">
+
+    <!-- Background Gambar -->
+    <div class="fixed inset-0 -z-10 bg-cover bg-center" style="background-image: url('/images/portobg.jpg');"></div>
 
     {{-- Container utama yang mengatur layout vertikal (Navbar, Konten, Footer) --}}
-    <div class="flex flex-col min-h-screen">
+    <div class="flex flex-col min-h-screen backdrop-blur-sm">
 
         {{-- NAVBAR --}}
         @include('layouts.navigation')

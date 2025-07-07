@@ -1,4 +1,4 @@
-<div class="item-container p-4 border rounded-md">
+<div class="item-container bg-white/40 p-4 border rounded-md">
     <div class="space-y-4">
         <div>
             <x-input-label :value="__('Nama Perusahaan')" />

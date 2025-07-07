@@ -1,9 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
+    <div name="header" class="bg-white/40">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Edit Portofolio') }}
         </h2>
-    </x-slot>
+    </div>
 
     <div class="py-12">
         <div class="w-full sm:px-6 lg:px-8 space-y-6">
@@ -27,7 +27,7 @@
                 @csrf
                 @method('PUT')
 
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg mb-6">
+                <div class="p-4 sm:p-8 bg-white/40 shadow sm:rounded-lg mb-6">
                     <h2 class="text-lg font-medium text-gray-900">Informasi Utama</h2>
                     <div class="mt-6 space-y-6">
                         <div>
@@ -56,7 +56,7 @@
                 @endphp
 
                 @foreach ($sections as $sectionName => $title)
-                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg mb-6">
+                <div class="p-4 sm:p-8 bg-white/40 shadow sm:rounded-lg mb-6">
                     <h2 class="text-lg font-medium text-gray-900">{{ $title }}</h2>
                     <div id="{{ $sectionName }}-wrapper" class="mt-6 space-y-4">
                         {{-- BLADE: Menampilkan data yang sudah ada --}}
