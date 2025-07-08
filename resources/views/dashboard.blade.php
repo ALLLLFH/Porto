@@ -1,6 +1,6 @@
 <x-app-layout>
     <div name="header" class="bg-white/40">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold pl-3 text-xl text-gray-800 leading-tight">
             {{ __('Edit Portofolio') }}
         </h2>
     </div>
