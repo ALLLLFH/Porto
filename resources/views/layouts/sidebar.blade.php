@@ -1,7 +1,7 @@
 {{-- resources/views/layouts/sidebar.blade.php --}}
 <aside
     :class="sidebarCollapsed ? 'w-20' : 'w-64'"
-    class="fixed top-0 left-0 h-screen bg-white/40 shadow p-4 flex flex-col justify-between overflow-hidden z-30 transition-all duration-300">
+    class="hidden md:block fixed top-0 left-0 h-screen bg-white/40 shadow p-4 flex flex-col justify-between z-30 transition-all duration-300">
     <div>
         <button @click="sidebarCollapsed = !sidebarCollapsed"
             class="mb-6 flex items-center justify-end w-full text-gray-500 hover:text-gray-700 focus:outline-none">

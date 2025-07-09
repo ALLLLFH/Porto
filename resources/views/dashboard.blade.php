@@ -9,18 +9,18 @@
         <div class="w-full sm:px-6 lg:px-8 space-y-6">
 
             @if (session('success'))
-                <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                    {{ session('success') }}
-                </div>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                {{ session('success') }}
+            </div>
             @endif
             @if ($errors->any())
-                <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                    <ul class="mt-2 list-disc list-inside">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                <ul class="mt-2 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
 
             <form action="{{ route('dashboard.update') }}" method="POST">
@@ -46,30 +46,50 @@
                 </div>
 
                 @php
-                    $sections = [
-                        'projects'     => 'Proyek',
-                        'experiences'  => 'Pengalaman Kerja',
-                        'educations'   => 'Pendidikan',
-                        'skills'       => 'Keahlian',
-                        'socialLinks'  => 'Tautan Sosial', // Menggunakan camelCase agar cocok dengan nama relasi
-                    ];
+                $sections = [
+                'projects' => 'Proyek',
+                'experiences' => 'Pengalaman Kerja',
+                'educations' => 'Pendidikan',
+                'skills' => 'Keahlian',
+                'socialLinks' => 'Tautan Sosial', // Menggunakan camelCase agar cocok dengan nama relasi
+                ];
+                $twoColumnSections = ['experiences', 'educations', 'skills', 'socialLinks']; // Sections yang akan ditampilkan dalam 2 kolom
                 @endphp
 
-                @foreach ($sections as $sectionName => $title)
+                {{-- Render Proyek (satu kolom penuh) --}}
                 <div class="p-4 sm:p-8 bg-white/40 shadow sm:rounded-lg mb-6">
-                    <h2 class="text-lg font-medium text-gray-900">{{ $title }}</h2>
-                    <div id="{{ $sectionName }}-wrapper" class="mt-6 space-y-4">
-                        {{-- BLADE: Menampilkan data yang sudah ada --}}
-                        @if ($portfolio->$sectionName)
-                            @foreach ($portfolio->$sectionName as $item)
-                                @include('partials.form-' . Str::singular($sectionName), ['item' => $item, 'index' => $loop->index])
-                            @endforeach
+                    <h2 class="text-lg font-medium text-gray-900">{{ $sections['projects'] }}</h2>
+                    <div id="projects-wrapper" class="mt-6 space-y-4">
+                        @if ($portfolio->projects)
+                        @foreach ($portfolio->projects as $item)
+                        @include('partials.form-project', ['item' => $item, 'index' => $loop->index])
+                        @endforeach
                         @endif
                     </div>
-                    <button type="button" class="add-item-btn mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-500" data-section="{{ $sectionName }}">Tambah {{ $title }}</button>
+                    <button type="button" class="add-item-btn mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-500" data-section="projects">Tambah Proyek</button>
+                </div>
+
+                {{-- Render section dua kolom --}}
+                @php
+                $twoColumnSections = ['experiences', 'educations', 'skills', 'socialLinks'];
+                @endphp
+                @foreach (array_chunk($twoColumnSections, 2) as $sectionPair)
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @foreach ($sectionPair as $sectionName)
+                    <div class="p-4 sm:p-8 bg-white/40 shadow sm:rounded-lg mb-6">
+                        <h2 class="text-lg font-medium text-gray-900">{{ $sections[$sectionName] }}</h2>
+                        <div id="{{ $sectionName }}-wrapper" class="mt-6 space-y-4">
+                            @if ($portfolio->$sectionName)
+                            @foreach ($portfolio->$sectionName as $item)
+                            @include('partials.form-' . Str::singular($sectionName), ['item' => $item, 'index' => $loop->index])
+                            @endforeach
+                            @endif
+                        </div>
+                        <button type="button" class="add-item-btn mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-500" data-section="{{ $sectionName }}">Tambah {{ $sections[$sectionName] }}</button>
+                    </div>
+                    @endforeach
                 </div>
                 @endforeach
-
                 <div class="flex items-center gap-4">
                     <x-primary-button>{{ __('Simpan Semua Perubahan') }}</x-primary-button>
                 </div>
@@ -99,31 +119,31 @@
 
     @push('scripts')
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Logika untuk tombol "Tambah"
-        document.querySelectorAll('.add-item-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const section = this.dataset.section;
-                const wrapper = document.getElementById(`${section}-wrapper`);
-                const template = document.getElementById(`${section}-template`).innerHTML;
-                
-                // Hitung index baru berdasarkan jumlah item yang sudah ada di wrapper
-                const newIndex = wrapper.querySelectorAll('.item-container').length;
-    
-                // Ganti placeholder 'INDEX' dengan index yang benar
-                const newItemHtml = template.replace(/INDEX/g, newIndex);
-    
-                wrapper.insertAdjacentHTML('beforeend', newItemHtml);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Logika untuk tombol "Tambah"
+            document.querySelectorAll('.add-item-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const section = this.dataset.section;
+                    const wrapper = document.getElementById(`${section}-wrapper`);
+                    const template = document.getElementById(`${section}-template`).innerHTML;
+
+                    // Hitung index baru berdasarkan jumlah item yang sudah ada di wrapper
+                    const newIndex = wrapper.querySelectorAll('.item-container').length;
+
+                    // Ganti placeholder 'INDEX' dengan index yang benar
+                    const newItemHtml = template.replace(/INDEX/g, newIndex);
+
+                    wrapper.insertAdjacentHTML('beforeend', newItemHtml);
+                });
+            });
+
+            // Logika untuk tombol "Hapus"
+            document.querySelector('body').addEventListener('click', function(e) {
+                if (e.target && e.target.classList.contains('remove-item-btn')) {
+                    e.target.closest('.item-container').remove();
+                }
             });
         });
-    
-        // Logika untuk tombol "Hapus"
-        document.querySelector('body').addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('remove-item-btn')) {
-                e.target.closest('.item-container').remove();
-            }
-        });
-    });
     </script>
     @endpush
 </x-app-layout>

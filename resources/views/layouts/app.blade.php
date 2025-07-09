@@ -16,14 +16,14 @@
     <div class="fixed inset-0 -z-10 bg-cover bg-center" style="background-image: url('/images/bg.jpg');"></div>
 
     {{-- SIDEBAR sticky, di luar kontainer blur --}}
-    <div x-data="{ sidebarCollapsed: false }">
+    <div x-data="{ sidebarCollapsed: true }">
         @include('layouts.sidebar', ['collapsed' => 'sidebarCollapsed'])
 
         <!-- Konten utama dan navbar -->
         <div class="flex flex-col min-h-screen backdrop-blur-sm">
             @include('layouts.navigation')
 
-            <main :class="sidebarCollapsed ? 'ml-20' : 'ml-64'" class="transition-all duration-300 min-h-screen">
+            <main :class="sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'" class="transition-all duration-300 min-h-screen">
                 @if (isset($header))
                 <header class="bg-white shadow mb-6">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
