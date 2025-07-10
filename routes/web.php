@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PortfolioController; // Sebelumnya PortofolioController
+use App\Http\Controllers\PortofolioController; // Sebelumnya PortofolioController
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +25,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Rute ini tidak perlu di dalam grup 'auth' karena untuk publik
-Route::get('/portfolio/{slug}', [PortfolioController::class, 'show'])->name('portfolio.show');
-
+Route::get('/portfolio/{slug}', [PortofolioController::class, 'show'])->name('portofolio.show');
 
 require __DIR__.'/auth.php';

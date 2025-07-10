@@ -12,7 +12,7 @@ class PortofolioController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**
@@ -47,7 +47,7 @@ class PortofolioController extends Controller
         $portfolio->load(['user', 'projects', 'experiences', 'educations', 'skills', 'socialLinks']);
 
         // 3. Kirim data portfolio yang lengkap ke view untuk ditampilkan
-        return view('portfolio.show', compact('portfolio'));
+        return view('portofolio', compact('portfolio'));
     }
 
     /**
