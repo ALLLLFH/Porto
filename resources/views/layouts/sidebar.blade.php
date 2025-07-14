@@ -1,7 +1,7 @@
 {{-- resources/views/layouts/sidebar.blade.php --}}
 <aside
     :class="sidebarCollapsed ? 'w-20' : 'w-64'"
-    class="hidden sm:block fixed top-0 left-0 h-screen bg-white/40 shadow p-4 flex flex-col justify-between z-30 transition-all duration-300">
+    class="hidden sm:block fixed top-0 left-0 h-screen bg-white/40 shadow p-4  flex-col justify-between z-30 transition-all duration-300">
     <div>
         <button @click="sidebarCollapsed = !sidebarCollapsed"
             class="mb-6 flex items-center justify-end w-full text-gray-500 hover:text-gray-700 focus:outline-none">
@@ -22,13 +22,15 @@
                         <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Data diri</span>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('portofolio.show', Auth::user()->portfolio->slug ?? '-') }}"
-                        class="flex items-center p-2 text-base font-normal text-stone-700 rounded-lg hover:bg-blue-200 group hover:text-blue-700 transition-all duration-200">
-                        <i class="fa-solid fa-address-card text-lg"></i>
-                        <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Portofolio</span>
-                    </a>
-                </li>
+                @if(Auth::user()->portfolio)
+                    <li>
+                        <a href="{{ route('portofolio.show', Auth::user()->portfolio) }}"
+                            class="flex items-center p-2 text-base font-normal text-stone-700 rounded-lg hover:bg-blue-200 group hover:text-blue-700 transition-all duration-200">
+                            <i class="fa-solid fa-address-card text-lg"></i>
+                            <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Portofolio</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </nav>
     </div>

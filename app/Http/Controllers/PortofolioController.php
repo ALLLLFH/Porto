@@ -34,20 +34,20 @@ class PortofolioController extends Controller
     /**
      * Menampilkan satu halaman portofolio berdasarkan slug-nya.
      *
-     * @param  string  $slug
+     * @param  \App\Models\Portfolio  $portfolio
      * @return \Illuminate\View\View
      */
-    public function show($slug)
+    public function show(Portfolio $portfolio)
     {
-        // 1. Cari portfolio di database menggunakan slug yang unik
-        // firstOrFail() akan otomatis menampilkan halaman 404 Not Found jika slug tidak ada
-        $portfolio = Portfolio::where('slug', $slug)->firstOrFail();
+        // Dengan Route Model Binding, Laravel otomatis mencari Portfolio berdasarkan slug
+        // dan akan menampilkan 404 Not Found jika tidak ditemukan.
+        // Baris Portfolio::where('slug', $slug)->firstOrFail() tidak lagi diperlukan.
 
         // 2. Load semua data relasi yang dibutuhkan untuk ditampilkan
         $portfolio->load(['user', 'projects', 'experiences', 'educations', 'skills', 'socialLinks']);
 
         // 3. Kirim data portfolio yang lengkap ke view untuk ditampilkan
-        return view('portofolio', compact('portfolio'));
+        return view('portofolio.index', compact('portfolio'));
     }
 
     /**

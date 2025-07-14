@@ -25,6 +25,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Rute ini tidak perlu di dalam grup 'auth' karena untuk publik
-Route::get('/portfolio/{slug}', [PortofolioController::class, 'show'])->name('portofolio.show');
+Route::get('/portfolio/{portfolio:slug}', [PortofolioController::class, 'show'])->name('portofolio.show');
 
 require __DIR__.'/auth.php';
