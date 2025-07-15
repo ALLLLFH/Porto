@@ -9,9 +9,9 @@
         </button>
 
         <div class="mb-6 flex items-center" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <i class="fa-solid fa-otter text-lg" x-show="!sidebarCollapsed"></i>
+            <i class="fa-solid fa-splotch text-lg" x-show="!sidebarCollapsed"></i>
             <h2 class="text-2xl font-semibold text-gray-800 ml-3" x-show="!sidebarCollapsed" x-transition>My Portfolio</h2>
-            <i class="fa-solid fa-otter text-2xl text-gray-800" x-show="sidebarCollapsed" x-transition></i>
+            <i class="fa-solid fa-splotch text-2xl text-gray-800" x-show="sidebarCollapsed" x-transition></i>
         </div>
         <nav>
             <ul class="space-y-2">
