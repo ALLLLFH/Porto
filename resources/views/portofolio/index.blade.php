@@ -9,6 +9,8 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <script src="https://kit.fontawesome.com/e5bf66877e.js" crossorigin="anonymous"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Alpine.js untuk interaktivitas -->
+    <script src="//unpkg.com/alpinejs" defer></script>
 </head>
 
 <body class="font-sans antialiased bg-gray-50">
@@ -59,8 +61,76 @@
     </header>
     <!-- Section Example -->
     <section id="proyek" class="py-12">
-        <h2 class="text-2xl font-bold mb-4">Proyek</h2>
-        {{-- ...konten proyek... --}}
+                <div class="container mx-auto px-6" x-data="{ selectedProject: null }">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-800">Proyek Saya</h2>
+                <p class="text-gray-600 mt-2">Klik pada proyek untuk melihat detailnya.</p>
+            </div>
+
+            @if ($portfolio->projects->isNotEmpty())
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    @foreach ($portfolio->projects as $project)
+                        <!-- Project Bubble -->
+                        <div @click="selectedProject = {{ json_encode($project) }}"
+                             class="group bg-white p-6 rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                            {{-- Tampilkan logo proyek, atau gambar placeholder jika tidak ada --}}
+                            <img src="{{ $project->logo ? asset('storage/' . $project->logo) : '/images/project-placeholder.png' }}"
+                                 alt="Logo {{ $project->title }}"
+                                 class="h-20 w-20 object-contain mb-4 transition-transform duration-300 group-hover:scale-110">
+                            <h3 class="font-bold text-gray-800">{{ $project->title }}</h3>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-center text-gray-500">Belum ada proyek yang ditambahkan.</p>
+            @endif
+
+            <!-- Project Detail Modal -->
+            <div x-show="selectedProject"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                 style="display: none;">
+
+                <!-- Modal Overlay -->
+                <div @click="selectedProject = null" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+                <!-- Modal Content -->
+                <div x-show="selectedProject"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-90"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-90"
+                     class="relative bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8">
+
+                    <!-- Close Button -->
+                    <button @click="selectedProject = null" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800">
+                        <i class="fa-solid fa-times text-2xl"></i>
+                    </button>
+
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4" x-text="selectedProject?.title"></h2>
+                    <p class="text-gray-600 mb-6" x-text="selectedProject?.description"></p>
+
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-2">Teknologi yang Digunakan:</h4>
+                        <p class="text-gray-600" x-text="selectedProject?.technologies"></p>
+                    </div>
+
+                    <div x-show="selectedProject?.project_link">
+                        <a :href="selectedProject?.project_link" target="_blank"
+                           class="inline-block bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition duration-300">
+                            Kunjungi Proyek <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
     <section id="pengalaman" class="py-12">
         <h2 class="text-2xl font-bold mb-4">Pengalaman Kerja</h2>
