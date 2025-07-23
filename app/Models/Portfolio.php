@@ -26,6 +26,7 @@ class Portfolio extends Model
         'description',
         'theme',
         'slug',
+        'profile_image_path',
         'created_at',
         'updated_at',
     ];

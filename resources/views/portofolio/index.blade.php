@@ -53,12 +53,12 @@
                 <!-- Kolom Kanan: Gambar -->
                 <div class="md:w-1/2 lg:w-2/5 flex justify-center md:justify-end">
                     <div class="relative w-64 h-64 md:w-80 md:h-80">
-                        <img src="/images/profile-placeholder.png" alt="Foto Profil" class="rounded-full w-full h-full object-cover shadow-2xl border-4 border-gray-100">
+                        <img src="{{ asset('storage/' . $portfolio->profile_image_path) }}" alt="Foto Profil" class="rounded-full w-full h-full object-cover shadow-2xl border-4 border-gray-100">
                     </div>
                 </div>
             </div>
         </div>
-</section>
+    </section>
     <!-- Section Example -->
     <section id="proyek" class="py-20 bg-gray-100">
         <div class="container mx-auto px-6">
@@ -162,7 +162,7 @@
             @endif
         </div>
     </section>
-    <ssection id="keahlian" class="py-20 bg-white">
+    <section id="keahlian" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-800">Keahlian Saya</h2>
@@ -197,7 +197,7 @@
             <p class="text-center text-gray-500">Belum ada keahlian yang ditambahkan.</p>
             @endif
         </div>
-    </ssection>
+    </section>
     {{-- Hanya tampilkan section ini jika ada data social links --}}
     @if ($portfolio->socialLinks->isNotEmpty())
     <section id="tautan" class="py-12">

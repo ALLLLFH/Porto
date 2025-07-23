@@ -7,6 +7,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DashboardController extends Controller
@@ -40,6 +41,7 @@ class DashboardController extends Controller
             'title'         => 'required|string|max:150',
             'description'   => 'nullable|string',
             'theme'         => 'required|string|max:50',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validasi untuk foto profil
 
             // Aturan untuk Project (sebagai array)
             'projects'      => 'nullable|array',
@@ -202,18 +204,36 @@ class DashboardController extends Controller
         // $validated = $request->all();
 
         // 2. Bungkus semua operasi dalam satu transaksi database
-        DB::transaction(function () use ($validated) {
+        DB::transaction(function () use ($validated, $request) {
             $user = Auth::user();
             $portfolio = $user->portfolio;
 
-            // 3. Update data utama (tabel portfolios)
-            $portfolio->update([
+            $portfolioData = [
                 'title'       => $validated['title'],
                 'description' => $validated['description'],
                 'theme'       => $validated['theme'],
                 'slug'        => Str::slug($validated['title']) . '-' . $user->id,
-            ]);
+            ];
 
+            // Cek jika ada file gambar baru yang di-upload
+            if ($request->hasFile('profile_image')) {
+                // Hapus gambar lama jika ada
+                if ($portfolio->profile_image_path) {
+                    Storage::disk('public')->delete($portfolio->profile_image_path);
+                }
+                // Simpan gambar baru dan dapatkan path-nya
+                $path = $request->file('profile_image')->store('profile_images', 'public');
+                $portfolioData['profile_image_path'] = $path;
+            }
+
+            // 3. Update data utama (tabel portfolios)
+            // $portfolio->update([
+            //     'title'       => $validated['title'],
+            //     'description' => $validated['description'],
+            //     'theme'       => $validated['theme'],
+            //     'slug'        => Str::slug($validated['title']) . '-' . $user->id,
+            // ]);
+            $portfolio->update($portfolioData);
             // 4. Sinkronkan semua data relasi dengan pola "Hapus dan Buat Ulang"
 
             // --- Projects ---

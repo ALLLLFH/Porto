@@ -20,6 +20,7 @@ return new class extends Migration
             
             $table->string('title', 150);
             $table->text('description')->nullable(); // Menambahkan ->nullable() jika deskripsi boleh kosong
+            $table->string('profile_image_path')->nullable(); // Kolom untuk path foto profil
             $table->string('theme', 50);
             $table->string('slug', 100)->unique(); // Menambahkan ->unique() untuk constraint UNIQUE
             

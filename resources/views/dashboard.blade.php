@@ -23,7 +23,7 @@
             </div>
             @endif
 
-            <form action="{{ route('dashboard.update') }}" method="POST">
+            <form action="{{ route('dashboard.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -41,6 +41,13 @@
                         <div>
                             <x-input-label for="theme" :value="__('Tema')" />
                             <x-text-input id="theme" name="theme" type="text" class="mt-1 block w-full" :value="old('theme', $portfolio->theme)" required />
+                        </div>
+                        <div>
+                            <x-input-label for="profile_image" :value="__('Foto Profil')" />
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $portfolio->profile_image_path) }}" alt="Current Profile Photo" class="rounded-full h-20 w-20 object-cover">
+                                </div>
+                            <input id="profile_image" name="profile_image" type="file" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                         </div>
                     </div>
                 </div>
