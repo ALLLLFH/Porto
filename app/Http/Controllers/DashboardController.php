@@ -47,8 +47,8 @@ class DashboardController extends Controller
             'projects'      => 'nullable|array',
             'projects.*.title' => 'required_with:projects|string|max:150',
             'projects.*.description' => 'nullable|string',
-            'projects.*.technologies' => 'nullable|string',
-            'projects.*.image' => 'nullable|string|max:255',
+            'projects.*.technologies' => 'required_with:projects|string',
+            'projects.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Gambar proyek boleh kosong, berupa teks, maksimal 255 karakter
             'projects.*.project_link' => 'nullable|url',
 
             // Aturan untuk Experience (sebagai array)
@@ -170,8 +170,8 @@ class DashboardController extends Controller
             'projects'      => 'nullable|array', // Projects boleh kosong, berupa array
             'projects.*.title' => 'required_with:projects|string|max:150', // Judul proyek harus diisi jika projects ada, berupa teks, maksimal 150 karakter
             'projects.*.description' => 'nullable|string', // Deskripsi proyek boleh kosong, berupa teks
-            'projects.*.technologies' => 'required|string|max:255',  // Adjust max length as needed.
-            'projects.*.image' => 'nullable|string|max:255', // Gambar proyek boleh kosong, berupa teks, maksimal 255 karakter
+            'projects.*.technologies' => 'required_with:projects|string',  // Adjust max length as needed.
+            'projects.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Gambar proyek boleh kosong, berupa teks, maksimal 255 karakter
             'projects.*.project_link' => 'nullable|url', // Tautan proyek boleh kosong, harus berupa URL yang valid
 
             // Aturan untuk Experience (sebagai array)
@@ -237,11 +237,31 @@ class DashboardController extends Controller
             // 4. Sinkronkan semua data relasi dengan pola "Hapus dan Buat Ulang"
 
             // --- Projects ---
-            $portfolio->projects()->delete();
-            if (!empty($validated['projects'])) {
-                $portfolio->projects()->createMany($validated['projects']);
+            // DITAMBAHKAN: Hapus file gambar lama dari storage sebelum menghapus record database
+            foreach ($portfolio->projects as $project) {
+                if ($project->image) {
+                    Storage::disk('public')->delete($project->image);
+                }
             }
-
+            $portfolio->projects()->delete();
+            if ($request->has('projects')) {
+                $projectsData = [];
+                foreach ($request->input('projects') as $index => $projectInput) {
+                    $data = [
+                        'title'        => $projectInput['title'],
+                        'description'  => $projectInput['description'],
+                        'technologies' => $projectInput['technologies'],
+                        'project_link' => $projectInput['project_link'],
+                        'image'        => null,
+                    ];
+                    // Cek dan simpan file gambar jika ada
+                    if ($request->hasFile("projects.{$index}.image")) {
+                        $data['image'] = $request->file("projects.{$index}.image")->store('project_images', 'public');
+                    }
+                    $projectsData[] = $data;
+                }
+                $portfolio->projects()->createMany($projectsData);
+            }
             // --- Experiences ---
             $portfolio->experiences()->delete();
             if (!empty($validated['experiences'])) {
