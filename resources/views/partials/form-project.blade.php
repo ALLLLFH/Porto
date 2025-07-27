@@ -14,13 +14,17 @@
         </div>
         <div>
             <x-input-label for="projects_{{ $index }}_image" :value="__('Gambar Proyek')" />
-            @if(isset($item) && $item->image)
-                <div class="mt-2">
-                    <img src="{{ asset('storage/' . $item->image) }}" alt="Project Image" class="rounded-md h-20 w-20 object-cover">
-                    <p class="text-xs text-gray-500 mt-1">Gambar saat ini. Upload file baru untuk mengganti.</p>
-                </div>
+
+            <input type="hidden" name="projects[{{ $index }}][existing_image]" value="{{ $item->image ?? '' }}">
+
+            @if( $item->image ?? false)
+            <div class="mt-2">
+                <img src="{{ asset('storage/' . $item->image) }}" alt="Project Image" class="rounded-md h-20 w-20 object-cover">
+                <p class="text-xs text-gray-500 mt-1">Gambar saat ini. Unggah file baru untuk mengganti.</p>
+            </div>
             @endif
-            <input id="projects_{{ $index }}_image" name="projects[{{ $index }}][image]" type="file" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+
+            <input type="file" id="projects_{{ $index }}_image" name="projects[{{ $index }}][image]" class="mt-2 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
         </div>
         <div>
             <x-input-label for="projects_{{ $index }}_project_link" :value="__('Link Proyek (jika ada)')" />

@@ -79,24 +79,48 @@ class DashboardController extends Controller
         ]);
 
         // 2. Bungkus semua dalam satu Database Transaction
-        $portfolio = DB::transaction(function () use ($validated) {
+        DB::transaction(function () use ($request, $validated) {
             $user_id = Auth::id();
 
-            // Buat entitas utama: Portfolio
-            $portfolio = Portfolio::create([
+            $portfolioData = [
                 'user_id'     => $user_id,
                 'title'       => $validated['title'],
                 'description' => $validated['description'],
                 'theme'       => $validated['theme'],
                 'slug'        => Str::slug($validated['title']) . '-' . $user_id,
-            ]);
+            ];
+
+            // Handle profile image saat create
+            if ($request->hasFile('profile_image')) {
+                $portfolioData['profile_image_path'] = $request->file('profile_image')->store('profile_images', 'public');
+            }
+
+            // Buat entitas utama: Portfolio
+            $portfolio = Portfolio::create($portfolioData);
+
+
+            // --- PERBAIKAN DI SINI ---
+            // Logika untuk menyimpan Project diubah dari createMany() menjadi perulangan
+            // agar bisa memproses file gambar satu per satu.
+
+            if (!empty($validated['projects'])) {
+                foreach ($validated['projects'] as $index => $projectData) {
+                    // Cek apakah ada file gambar untuk proyek ini
+                    if ($request->hasFile("projects.{$index}.image")) {
+                        // Simpan file dan ganti isi 'image' dengan path-nya
+                        $projectData['image'] = $request->file("projects.{$index}.image")->store('project_images', 'public');
+                    }
+                    // Buat record proyek yang berelasi dengan portfolio
+                    $portfolio->projects()->create($projectData);
+                }
+            }
 
             // 3. Gunakan pola yang sama untuk menyimpan setiap data relasi
 
             // Simpan Projects jika ada datanya
-            if (!empty($validated['projects'])) {
-                $portfolio->projects()->createMany($validated['projects']);
-            }
+            // if (!empty($validated['projects'])) {
+            //     $portfolio->projects()->createMany($validated['projects']);
+            // }
 
             // Simpan Experiences jika ada datanya
             if (!empty($validated['experiences'])) {
@@ -167,12 +191,13 @@ class DashboardController extends Controller
             'theme'         => 'required|string|max:50', // Tema harus diisi, berupa teks, maksimal 50 karakter
 
             // Aturan untuk Project (sebagai array)
-            'projects'      => 'nullable|array', // Projects boleh kosong, berupa array
-            'projects.*.title' => 'required_with:projects|string|max:150', // Judul proyek harus diisi jika projects ada, berupa teks, maksimal 150 karakter
-            'projects.*.description' => 'nullable|string', // Deskripsi proyek boleh kosong, berupa teks
-            'projects.*.technologies' => 'required_with:projects|string',  // Adjust max length as needed.
-            'projects.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Gambar proyek boleh kosong, berupa teks, maksimal 255 karakter
-            'projects.*.project_link' => 'nullable|url', // Tautan proyek boleh kosong, harus berupa URL yang valid
+            'projects'      => 'nullable|array',
+            'projects.*.title' => 'required_with:projects|string|max:150',
+            'projects.*.description' => 'nullable|string',
+            'projects.*.technologies' => 'nullable|string',
+            'projects.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'projects.*.project_link' => 'nullable|url',
+            'projects.*.current_image' => 'nullable|image', // Untuk melacak gambar lama
 
             // Aturan untuk Experience (sebagai array)
             'experiences'   => 'nullable|array', // Experiences boleh kosong, berupa array
@@ -201,96 +226,81 @@ class DashboardController extends Controller
             'social_links.*.url' => 'required_with:social_links|url', // URL harus diisi jika social_links ada, harus berupa URL yang valid
         ]);
 
+        $imagesToDelete = collect(); // Koleksi untuk menyimpan gambar yang akan dihapus
         // $validated = $request->all();
 
         // 2. Bungkus semua operasi dalam satu transaksi database
-        DB::transaction(function () use ($validated, $request) {
+        DB::transaction(function () use ($request, $validated, &$imagesToDelete) {
             $user = Auth::user();
             $portfolio = $user->portfolio;
 
+            // 1. Update data utama dari $validated
             $portfolioData = [
                 'title'       => $validated['title'],
-                'description' => $validated['description'],
+                'description' => $validated['description'] ?? null,
                 'theme'       => $validated['theme'],
                 'slug'        => Str::slug($validated['title']) . '-' . $user->id,
             ];
 
-            // Cek jika ada file gambar baru yang di-upload
             if ($request->hasFile('profile_image')) {
-                // Hapus gambar lama jika ada
                 if ($portfolio->profile_image_path) {
-                    Storage::disk('public')->delete($portfolio->profile_image_path);
+                    // Kumpulkan path gambar untuk dihapus nanti, JANGAN langsung hapus
+                    $imagesToDelete->push($portfolio->profile_image_path);
                 }
-                // Simpan gambar baru dan dapatkan path-nya
-                $path = $request->file('profile_image')->store('profile_images', 'public');
-                $portfolioData['profile_image_path'] = $path;
+                $portfolioData['profile_image_path'] = $request->file('profile_image')->store('profile_images', 'public');
             }
-
-            // 3. Update data utama (tabel portfolios)
-            // $portfolio->update([
-            //     'title'       => $validated['title'],
-            //     'description' => $validated['description'],
-            //     'theme'       => $validated['theme'],
-            //     'slug'        => Str::slug($validated['title']) . '-' . $user->id,
-            // ]);
             $portfolio->update($portfolioData);
-            // 4. Sinkronkan semua data relasi dengan pola "Hapus dan Buat Ulang"
 
-            // --- Projects ---
-            // DITAMBAHKAN: Hapus file gambar lama dari storage sebelum menghapus record database
-            foreach ($portfolio->projects as $project) {
-                if ($project->image) {
-                    Storage::disk('public')->delete($project->image);
-                }
-            }
+            // 2. Sinkronisasi relasi HANYA menggunakan data dari $validated
+
+            // --- Projects (dengan penanganan file yang aman) ---
+            $oldProjectImages = $portfolio->projects->pluck('image')->filter();
             $portfolio->projects()->delete();
-            if ($request->has('projects')) {
-                $projectsData = [];
-                foreach ($request->input('projects') as $index => $projectInput) {
-                    $data = [
-                        'title'        => $projectInput['title'],
-                        'description'  => $projectInput['description'],
-                        'technologies' => $projectInput['technologies'],
-                        'project_link' => $projectInput['project_link'],
-                        'image'        => null,
-                    ];
-                    // Cek dan simpan file gambar jika ada
+            $newProjectImages = collect();
+
+            if (!empty($validated['projects'])) {
+                foreach ($validated['projects'] as $index => $projectData) {
                     if ($request->hasFile("projects.{$index}.image")) {
-                        $data['image'] = $request->file("projects.{$index}.image")->store('project_images', 'public');
+                        $projectData['image'] = $request->file("projects.{$index}.image")->store('project_images', 'public');
                     }
-                    $projectsData[] = $data;
+                    $createdProject = $portfolio->projects()->create($projectData);
+                    if ($createdProject->image) $newProjectImages->push($createdProject->image);
                 }
-                $portfolio->projects()->createMany($projectsData);
             }
-            // --- Experiences ---
+            // Hapus file gambar lama yang tidak terpakai
+            $imagesToDelete = $imagesToDelete->merge($oldProjectImages->diff($newProjectImages));
+
+            // --- Sinkronisasi relasi lain (tanpa file) ---
             $portfolio->experiences()->delete();
+            // GUNAKAN INI:
             if (!empty($validated['experiences'])) {
                 $portfolio->experiences()->createMany($validated['experiences']);
             }
 
-            // --- Educations ---
             $portfolio->educations()->delete();
+            // GUNAKAN INI:
             if (!empty($validated['educations'])) {
                 $portfolio->educations()->createMany($validated['educations']);
             }
 
-            // --- Skills ---
+            // Lakukan hal yang sama untuk skills dan socialLinks
             $portfolio->skills()->delete();
             if (!empty($validated['skills'])) {
                 $portfolio->skills()->createMany($validated['skills']);
             }
 
-            // --- Social Links ---
             $portfolio->socialLinks()->delete();
             if (!empty($validated['social_links'])) {
                 $portfolio->socialLinks()->createMany($validated['social_links']);
             }
         });
+        
+        if ($imagesToDelete->isNotEmpty()) {
+            Storage::disk('public')->delete($imagesToDelete->unique()->all());
+        }
 
-        // 5. Redirect kembali dengan pesan sukses
         return redirect()->route('dashboard')->with('success', 'Portfolio berhasil diperbarui!');
     }
-
     /**
      * Remove the specified resource from storage.
      */
